@@ -1,15 +1,13 @@
-import { useEffect, useState } from "react";
-import { Pressable, Text, View } from "react-native";
-import { Col } from 'react-native-flex-grid';
-import { BONUS_POINTS, BONUS_POINTS_LIMIT, MAX_SPOT, NBR_OF_DICES, NBR_OF_THROWS, SCOREBOARD_KEY } from '../constants/Game';
-import Footer from "./Footer";
-import Header from "./Header";
-//import { BONUS_POINTS, BONUS_POINTS_LIMIT, MAX_SPOT, MIN_SPOT, NBR_OF_DICES, NBR_OF_THROWS, SCOREBOARD_KEY } from '../constants/Game';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Container, Row } from 'react-native-flex-grid';
+import { useEffect, useState } from "react";
+import { Pressable, Text, View } from "react-native";
+import { Col, Container, Row } from 'react-native-flex-grid';
 import { Button } from "react-native-paper";
+import { BONUS_POINTS, BONUS_POINTS_LIMIT, MAX_SPOT, NBR_OF_DICES, NBR_OF_THROWS, SCOREBOARD_KEY } from '../constants/Game';
 import Styles, { pink } from "../style/Styles";
+import Footer from "./Footer";
+import Header from "./Header";
 
 let board = [];
 const initialSelectedDices = new Array(NBR_OF_DICES).fill(false);
