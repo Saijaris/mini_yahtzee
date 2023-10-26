@@ -1,5 +1,7 @@
 import { StyleSheet } from 'react-native';
 
+export const pink = 'rgb(227, 26, 123)';
+
 export default StyleSheet.create({
     container: {
         flex: 1,
@@ -8,13 +10,14 @@ export default StyleSheet.create({
     header: {
         marginTop: 30,
         marginBottom: 15,
-        backgroundColor: 'skyblue',
+        backgroundColor: pink,
         flexDirection: 'row',
     },
     footer: {
         marginTop: 20,
-        backgroundColor: 'skyblue',
+        backgroundColor: pink,
         flexDirection: 'row'
+
     },
     title: {
         color: '#fff',
@@ -53,28 +56,26 @@ export default StyleSheet.create({
     },
     view: {
         padding: 10,
-        alignItems: 'center'
+        alignItems: 'center',
+        flexGrow: 1
     },
     icons: {
         alignItems: 'center',
         justifyContent: 'center'
     },
-    /* text: {
-        paddingLeft: 10,
-        paddingRight: 10
-    }, */
-    button: {
-        margin: 30,
-        flexDirection: "row",
-        padding: 10,
-        backgroundColor: "#73CED6",
-        width: 150,
-        borderRadius: 15,
-        justifyContent: 'center',
-        alignItems: 'center'
+    bigText: {
+        fontSize: 30,
+        alignItems: 'center',
+        justifyContent: 'center'
     },
-    buttonText: {
-        color: "#2B2B52",
-        fontSize: 20
-    }
+    text: {
+        padding: 10,
+        margin: 10
+    },
+    button: {
+        marginTop: 10,
+        backgroundColor: pink,
+        borderRadius: 5,
+        color: '#ffffff'
+    },
 });

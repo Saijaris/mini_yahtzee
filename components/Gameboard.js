@@ -8,34 +8,38 @@ import Header from "./Header";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Container, Row } from 'react-native-flex-grid';
-import Styles from "../style/Styles";
+import { Button } from "react-native-paper";
+import Styles, { pink } from "../style/Styles";
 
 let board = [];
+const initialSelectedDices = new Array(NBR_OF_DICES).fill(false);
+const initialSelectedDicePoints = new Array(MAX_SPOT).fill(false);
+const initialDiceSpots = new Array(NBR_OF_DICES).fill(0);
+const initialDicePointsTotal = new Array(MAX_SPOT).fill(0);
+const initialStatus = 'Throw dices';
 
 const Gameboard = ({ navigation, route }) => {
 
     const [playerName, setPlayerName] = useState('');
     const [nbrOfThrowsLeft, setNbrOfThrowsLeft] = useState(NBR_OF_THROWS);
-    const [status, setStatus] = useState('Throw dices');
+    const [status, setStatus] = useState(initialStatus);
     const [gameEndStatus, setGameEndStatus] = useState(false);
+    const [roundEndStatus, setRoundEndStatus] = useState(false);
     //Mitkä nopat ovat valittu
-    const [selectedDices, setSelectedDices] = useState(new Array(NBR_OF_DICES).fill(false));
+    const [selectedDices, setSelectedDices] = useState(initialSelectedDices);
     //Noppien silmäluvut
-    const [diceSpots, setDiceSpots] = useState(new Array(NBR_OF_DICES).fill(0));
+    const [diceSpots, setDiceSpots] = useState(initialDiceSpots);
     //Onko silmäluvulle valittu pisteet
-    const [selectedDicePoints, setSelectedDicePoints] = useState(new Array(MAX_SPOT).fill(false));
+    const [selectedDicePoints, setSelectedDicePoints] = useState(initialSelectedDicePoints);
     //Kerätyt pisteet
-    const [dicePointsTotal, setDicePointsTotal] = useState(new Array(MAX_SPOT).fill(0));
-    //Tulostaulun pisteet
-    const [scores, setScores] = useState([]);
+    const [dicePointsTotal, setDicePointsTotal] = useState(initialDicePointsTotal);
     const diceMultiple = <MaterialCommunityIcons
         name={"dice-multiple"}
         size={50}
-        color="steelblue">
+        color={pink}>
     </MaterialCommunityIcons>
-    console.log(scores)
     const totalDicePoints = dicePointsTotal.reduce((total, x) => total + x, 0);
-    const totalScores = totalDicePoints > BONUS_POINTS_LIMIT ? totalDicePoints + BONUS_POINTS : totalDicePoints;
+    const totalScores = totalDicePoints >= BONUS_POINTS_LIMIT ? totalDicePoints + BONUS_POINTS : totalDicePoints;
     const pointsFromBonus = totalScores < BONUS_POINTS_LIMIT ? BONUS_POINTS_LIMIT - totalScores : 0;
 
     useEffect(() => {
@@ -112,7 +116,13 @@ const Gameboard = ({ navigation, route }) => {
             }
             setDicePointsTotal(points);
             setSelectedDicePoints(selectedPoints);
-            setGameEndStatus(true);
+            setRoundEndStatus(true);
+            setNbrOfThrowsLeft(NBR_OF_THROWS);
+            setSelectedDices(initialSelectedDices);
+            if (selectedPoints.every(value => value)) {
+                setGameEndStatus(true);
+                return;
+            }
             return points[i];
         }
         else {
@@ -121,15 +131,14 @@ const Gameboard = ({ navigation, route }) => {
     }
 
     const savePlayerPoints = async () => {
-        const newKey = scores.length + 1;
+        const scores = await getScoreboardData();
         const t = new Date();
-        const stime = `${t.getHours()}.${t.getMinutes()}.${t.getSeconds()}`
         const playerPoints = {
-            key: newKey,
+            key: playerName + '-' + t.getTime(),
             name: playerName,
             date: t.toLocaleDateString(),
-            time: stime,
-            points: 0 //Yhteispisteet, mahdollinen bonus mukaan
+            time: t.toLocaleTimeString(),
+            points: totalScores,
         }
 
         try {
@@ -147,8 +156,9 @@ const Gameboard = ({ navigation, route }) => {
             const jsonValue = await AsyncStorage.getItem(SCOREBOARD_KEY);
             if (jsonValue !== null) {
                 let tmpScores = JSON.parse(jsonValue);
-                setScores(tmpScores);
+                return tmpScores ? tmpScores : []
             }
+            return []
         }
         catch (e) {
             console.log('Read error: ' + e);
@@ -156,7 +166,7 @@ const Gameboard = ({ navigation, route }) => {
     }
 
     const throwDices = () => {
-        if (nbrOfThrowsLeft === 0 && !gameEndStatus) {
+        if (nbrOfThrowsLeft === 0 && !roundEndStatus) {
             setStatus('Select your points before the next throw');
             return 1;
         }
@@ -173,9 +183,10 @@ const Gameboard = ({ navigation, route }) => {
                 spots[i] = randomNumber;
             }
         }
-        setNbrOfThrowsLeft(nbrOfThrowsLeft - 1);
+        setNbrOfThrowsLeft(prev => prev - 1);
         setDiceSpots(spots);
         setStatus('Select and throw dices again');
+        setRoundEndStatus(false);
     }
 
     function getSpotTotal(i) {
@@ -194,26 +205,37 @@ const Gameboard = ({ navigation, route }) => {
     }
 
     function getDiceColor(i) {
-        return selectedDices[i] ? "black" : "steelblue";
+        return selectedDices[i] ? "black" : pink;
     }
 
     function getDicePointsColor(i) {
-        return selectedDicePoints[i] && !gameEndStatus ? "black" : "steelblue";
+        return selectedDicePoints[i] && !gameEndStatus ? "black" : pink;
+    }
+
+    const reset = () => {
+        setSelectedDices(initialSelectedDices);
+        setSelectedDicePoints(initialSelectedDicePoints);
+        setDiceSpots(initialDiceSpots);
+        setDicePointsTotal(initialDicePointsTotal);
+        setStatus(initialStatus);
+        setNbrOfThrowsLeft(NBR_OF_THROWS);
+        setGameEndStatus(false);
+        setRoundEndStatus(false);
     }
 
     return (
         <>
             <Header />
-            <View>
+            <View style={Styles.view}>
                 <Container fluid>
-                    <Row style={Styles.icons}>{nbrOfThrowsLeft === 3 ? diceMultiple : dicesRow}</Row>
+                    {gameEndStatus ? <><Row style={Styles.icons}><Text>GAME OVER</Text></Row>
+                        <Row style={Styles.icons}><Button style={Styles.button} textColor='#ffffff' onPress={reset}>NEW GAME</Button></Row></>
+                        : <Row style={Styles.icons}>{nbrOfThrowsLeft === 3 ? diceMultiple : dicesRow}</Row>}
                 </Container>
                 <Text>Throws left: {nbrOfThrowsLeft}</Text>
                 <Text>{status}</Text>
-                <Pressable
-                    onPress={() => throwDices()}>
-                    <Text>THROW DICES</Text>
-                </Pressable>
+                <Button style={Styles.button} textColor='#ffffff'
+                    onPress={() => throwDices()}>THROW DICES</Button>
                 <Container fluid>
                     <Row><Text>Total: {totalScores}</Text></Row>
                     <Row>{totalScores < BONUS_POINTS_LIMIT ? <Text>You are {pointsFromBonus} points away from bonus</Text>
@@ -223,10 +245,7 @@ const Gameboard = ({ navigation, route }) => {
                 <Container fluid>
                     <Row>{pointsToSelectRow}</Row>
                 </Container>
-                <Pressable
-                    onPress={() => savePlayerPoints()}>
-                    <Text>SAVE POINTS</Text>
-                </Pressable>
+                <Button style={Styles.button} textColor='#ffffff' onPress={() => savePlayerPoints()}>SAVE POINTS</Button>
                 <Text>Player: {playerName}</Text>
             </View>
             <Footer />

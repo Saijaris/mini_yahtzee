@@ -4,6 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import Gameboard from './components/Gameboard';
 import Home from './components/Home';
 import Scoreboard from './components/Scoreboard';
+import { pink } from './style/Styles';
 
 const Tab = createBottomTabNavigator();
 
@@ -37,7 +38,7 @@ export default function App() {
               color={color}
             />
           },
-          tabBarActiveTintColor: 'steelblue',
+          tabBarActiveTintColor: pink,
           tabBarInactiveTintColor: 'gray'
         })}
       >

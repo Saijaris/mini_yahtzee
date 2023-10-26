@@ -1,8 +1,9 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useState } from "react";
-import { Keyboard, Pressable, Text, TextInput, View } from "react-native";
+import { Keyboard, Text, TextInput, View } from "react-native";
+import { Button } from 'react-native-paper';
 import { BONUS_POINTS, BONUS_POINTS_LIMIT, MAX_SPOT, MIN_SPOT, NBR_OF_DICES, NBR_OF_THROWS } from '../constants/Game';
-import Styles from '../style/Styles';
+import Styles, { pink } from '../style/Styles';
 import Footer from "./Footer";
 import Header from "./Header";
 
@@ -22,15 +23,13 @@ const Home = ({ navigation }) => {
         <>
             <Header />
             <View style={Styles.view}>
-                <MaterialCommunityIcons name="information" size={90} color="steelblue" />
+                <MaterialCommunityIcons name="information" size={90} color={pink} />
                 {!hasPlayerName ?
                     <>
-                        <Text>For scoreboard enter your name...</Text>
+                        <Text>For scoreboard enter your name</Text>
                         <TextInput onChangeText={setPlayerName} autoFocus={true} />
-                        <Pressable
-                            onPress={() => handlePlayerName(playerName)}>
-                            <Text>OK</Text>
-                        </Pressable>
+                        <Button style={Styles.button} textColor='#ffffff'
+                            onPress={() => handlePlayerName(playerName)}>OK</Button>
                     </>
                     :
                     <>
@@ -54,10 +53,8 @@ const Home = ({ navigation }) => {
                             {BONUS_POINTS_LIMIT} points is the limit of
                             getting bonus which gives you {BONUS_POINTS} points more.</Text>
                         <Text>Good luck, {playerName}</Text>
-                        <Pressable
-                            onPress={() => navigation.navigate('Gameboard', { player: playerName })}>
-                            <Text>PLAY</Text>
-                        </Pressable>
+                        <Button style={Styles.button} textColor='#ffffff'
+                            onPress={() => navigation.navigate('Gameboard', { player: playerName })}>PLAY</Button>
                     </>
                 }
             </View>
